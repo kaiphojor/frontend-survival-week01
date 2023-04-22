@@ -172,6 +172,7 @@ ssh-keygen -t ed25519 -C "<<GIT EMAIL 주소>>"
 ```
 
 `~/.profile` 또는 `~/.bashrc` 파일에 붙여넣기.
+
 ```bash
 env=~/.ssh/agent.env
 
