@@ -79,6 +79,8 @@ brew install fnm
 eval "$(fnm env)"
 ```
 
+혹은 `eval "$(fnm env --use-on-cd)"`을 bash 상에 입력해도 된다.
+
 현재 터미널에서 바로 사용하고 싶다면 위 명령을 그대로 입력한다.
 
 ### fnm - Node.js 설치
@@ -159,6 +161,66 @@ npm init -y # 질문 없이 생성
 
 ```bash
 vim .gitignore # 최소한 node_modules/ 추가
+```
+
+## Git SSH 설정
+
+git 이메일 주소를 통해 key를 생성한다.
+
+```bash
+ssh-keygen -t ed25519 -C "<<GIT EMAIL 주소>>"
+```
+
+`~/.profile` 또는 `~/.bashrc` 파일에 붙여넣기.
+```bash
+env=~/.ssh/agent.env
+
+agent_load_env () { test -f "$env" && . "$env" >| /dev/null ; }
+
+agent_start () {
+    (umask 077; ssh-agent >| "$env")
+    . "$env" >| /dev/null ; }
+
+agent_load_env
+
+# agent_run_state: 0=agent running w/ key; 1=agent w/o key; 2=agent not running
+agent_run_state=$(ssh-add -l >| /dev/null 2>&1; echo $?)
+
+if [ ! "$SSH_AUTH_SOCK" ] || [ $agent_run_state = 2 ]; then
+    agent_start
+    ssh-add
+elif [ "$SSH_AUTH_SOCK" ] && [ $agent_run_state = 1 ]; then
+    ssh-add
+fi
+
+unset env
+```
+
+ssh-agent 수동 시작
+
+```bash
+eval "$(ssh-agent -s)"
+```
+
+ssh-agent에 SSH private key 추가
+
+```bash
+ssh-add ~/.ssh/id_ed25519
+```
+
+SSH public key 복사
+
+```bash
+$ clip < ~/.ssh/id_ed25519.pub
+  # Copies the contents of the id_ed25519.pub file to your clipboard
+# 혹시 WSL 환경에서 clip 이 동작안한다면 clip 대신 clip.exe 를 넣어보자
+```
+
+GitHub에 ssh key 등록
+
+```text
+우상단 Profile 그림 클릭 -> Settings -> 좌측 Access menu의 SSH and GPG Keys 
+-> New SSH Key -> key에 clipboard 붙여넣기 및 title 지정 
 ```
 
 ## TypeScript 설정
